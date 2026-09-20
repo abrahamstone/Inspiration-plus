@@ -132,6 +132,21 @@
     margin: 0;
   }
 
+  .suggest-link {
+    display: block;
+    text-align: center;
+    margin-top: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.85rem;
+    color: var(--accent-2);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .suggest-link:hover {
+    text-decoration: underline;
+  }
+
   .tabs {
     display: flex;
     gap: 8px;
@@ -358,178 +373,6 @@
     padding: 12px 0;
   }
 
-  .add-form {
-    background: var(--bg-2);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 22px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .lock-screen {
-    background: var(--bg-2);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 40px 24px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .lock-icon {
-    font-size: 2.4rem;
-  }
-
-  .lock-screen p {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    color: var(--text-soft);
-    font-size: 0.9rem;
-    margin: 0;
-  }
-
-  .lock-screen input {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 0.95rem;
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    width: 100%;
-    max-width: 220px;
-    text-align: center;
-  }
-
-  .lock-screen .btn {
-    max-width: 220px;
-    width: 100%;
-  }
-
-  .add-form label {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-soft);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-top: 10px;
-  }
-
-  .add-form label:first-child { margin-top: 0; }
-
-  .add-form textarea,
-  .add-form input,
-  .add-form select {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 0.95rem;
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    resize: vertical;
-  }
-
-  .add-form textarea:focus,
-  .add-form input:focus,
-  .add-form select:focus {
-    outline: 2px solid var(--accent);
-    outline-offset: 1px;
-  }
-
-  .add-form input#inputNouvelleCategorie {
-    margin-top: 8px;
-  }
-
-  .add-form .btn {
-    margin-top: 18px;
-    width: 100%;
-  }
-
-  .my-quotes-section {
-    margin-top: 30px;
-  }
-
-  .my-quote-item {
-    background: var(--bg-2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 8px;
-    font-size: 0.92rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .my-quote-meta {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    color: var(--text-soft);
-    font-size: 0.76rem;
-    margin-top: 4px;
-  }
-
-  .confirm-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    z-index: 50;
-  }
-
-  .confirm-overlay.hidden {
-    display: none;
-  }
-
-  .confirm-box {
-    background: var(--bg-2);
-    border-radius: 18px;
-    padding: 28px 24px;
-    max-width: 420px;
-    width: 100%;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.35);
-  }
-
-  .confirm-title {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
-    margin-bottom: 14px;
-    text-align: center;
-  }
-
-  .confirm-preview {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 18px;
-  }
-
-  .confirm-preview p {
-    margin: 4px 0 10px;
-    font-size: 1.05rem;
-    line-height: 1.4;
-  }
-
-  .confirm-author {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    color: var(--text-soft);
-    font-size: 0.85rem;
-  }
-
-  .confirm-actions {
-    display: flex;
-    gap: 10px;
-  }
 </style>
 </head>
 <body>
@@ -544,7 +387,6 @@
   <div class="tabs" id="tabs">
     <button class="tab active" id="tabCitations" type="button">Citations</button>
     <button class="tab" id="tabFavoris" type="button">Favoris <span id="favCount"></span></button>
-    <button class="tab" id="tabAjouter" type="button">➕ Ajouter</button>
   </div>
 
   <div id="viewCitations">
@@ -564,6 +406,8 @@
       <button class="btn btn-secondary" id="copyBtn">Copier</button>
       <button class="btn btn-primary" id="newBtn">Nouvelle citation</button>
     </div>
+
+    <a class="suggest-link" href="https://docs.google.com/forms/d/e/1FAIpQLScQ790noeAk8HSE54xhhEwHdWb3IPgl-8wuF8P9KIKxgDki5Q/viewform?usp=dialog" target="_blank" rel="noopener">✏️ Suggérer une citation</a>
   </div>
 
   <div id="viewFavoris" class="hidden">
@@ -571,46 +415,6 @@
       <div id="favList"></div>
     </div>
   </div>
-
-  <div id="viewAjouter" class="hidden">
-    <div id="ajouterContent">
-      <div class="add-form">
-        <label for="inputTexte">Citation</label>
-        <textarea id="inputTexte" rows="3" placeholder="Écris ta citation ici..."></textarea>
-
-        <label for="inputAuteur">Auteur</label>
-        <input type="text" id="inputAuteur" value="Abraham K">
-
-        <label for="inputCategorie">Catégorie</label>
-        <select id="inputCategorie"></select>
-        <input type="text" id="inputNouvelleCategorie" placeholder="Nom de la nouvelle catégorie" class="hidden">
-
-        <button class="btn btn-primary" id="addQuoteBtn" type="button">Ajouter la citation</button>
-      </div>
-
-      <div class="my-quotes-section">
-        <div class="favorites-title">Mes citations ajoutées</div>
-        <div id="myQuotesList"></div>
-      </div>
-    </div>
-  </div>
-
-  <div id="confirmOverlay" class="confirm-overlay hidden">
-    <div class="confirm-box">
-      <div class="confirm-title">Confirmer l'ajout ?</div>
-      <div class="confirm-preview">
-        <div class="quote-mark" style="font-size:1.6rem;">"</div>
-        <p id="confirmText"></p>
-        <div class="confirm-author" id="confirmAuthor"></div>
-        <div class="quote-category" id="confirmCategory"></div>
-      </div>
-      <div class="confirm-actions">
-        <button class="btn btn-secondary" id="confirmCancel" type="button">Annuler</button>
-        <button class="btn btn-primary" id="confirmOk" type="button">Confirmer</button>
-      </div>
-    </div>
-  </div>
-
 
   <footer class="site-footer">
     <div class="footer-line"></div>
@@ -761,38 +565,8 @@ const toastEl = document.getElementById('toast');
 const cardEl = document.getElementById('card');
 const tabCitations = document.getElementById('tabCitations');
 const tabFavoris = document.getElementById('tabFavoris');
-const tabAjouter = document.getElementById('tabAjouter');
 const viewCitations = document.getElementById('viewCitations');
 const viewFavoris = document.getElementById('viewFavoris');
-const viewAjouter = document.getElementById('viewAjouter');
-const inputTexte = document.getElementById('inputTexte');
-const inputAuteur = document.getElementById('inputAuteur');
-const inputCategorie = document.getElementById('inputCategorie');
-const inputNouvelleCategorie = document.getElementById('inputNouvelleCategorie');
-const myQuotesListEl = document.getElementById('myQuotesList');
-
-function loadUserQuotes() {
-  try {
-    const raw = localStorage.getItem('etincelle_user_quotes');
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) { return []; }
-}
-
-function saveUserQuotes(quotes) {
-  try { localStorage.setItem('etincelle_user_quotes', JSON.stringify(quotes)); } catch (e) {}
-}
-
-let userQuotes = loadUserQuotes();
-
-function allQuotes() {
-  return QUOTES.concat(userQuotes);
-}
-
-function allCategories() {
-  const cats = new Set(CATEGORIES.filter(c => c !== 'Toutes'));
-  userQuotes.forEach(q => cats.add(q.c));
-  return ['Toutes', ...Array.from(cats).sort((a, b) => a.localeCompare(b, 'fr'))];
-}
 
 function loadFavorites() {
   try {
@@ -817,7 +591,7 @@ function showToast(msg) {
 
 function renderChips() {
   chipsEl.innerHTML = '';
-  allCategories().forEach(cat => {
+  CATEGORIES.forEach(cat => {
     const btn = document.createElement('button');
     btn.className = 'chip' + (cat === currentCategory ? ' active' : '');
     btn.textContent = cat;
@@ -832,8 +606,8 @@ function renderChips() {
 }
 
 function pool() {
-  if (currentCategory === "Toutes") return allQuotes();
-  return allQuotes().filter(q => q.c === currentCategory);
+  if (currentCategory === "Toutes") return QUOTES;
+  return QUOTES.filter(q => q.c === currentCategory);
 }
 
 function pickQuote() {
@@ -906,124 +680,20 @@ heartBtn.onclick = () => {
 
 document.getElementById('newBtn').onclick = () => pickQuote();
 
-function switchTab(tab) {
-  [tabCitations, tabFavoris, tabAjouter].forEach(t => t.classList.remove('active'));
-  [viewCitations, viewFavoris, viewAjouter].forEach(v => v.classList.add('hidden'));
-  if (tab === 'citations') {
-    tabCitations.classList.add('active');
-    viewCitations.classList.remove('hidden');
-  } else if (tab === 'favoris') {
-    tabFavoris.classList.add('active');
-    viewFavoris.classList.remove('hidden');
-    renderFavorites();
-  } else if (tab === 'ajouter') {
-    tabAjouter.classList.add('active');
-    viewAjouter.classList.remove('hidden');
-    renderCategorySelect();
-    renderMyQuotes();
-  }
-}
-
-tabCitations.onclick = () => switchTab('citations');
-tabFavoris.onclick = () => switchTab('favoris');
-tabAjouter.onclick = () => switchTab('ajouter');
-
-function renderCategorySelect() {
-  const cats = allCategories().filter(c => c !== 'Toutes');
-  inputCategorie.innerHTML = '';
-  cats.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c;
-    opt.textContent = c;
-    inputCategorie.appendChild(opt);
-  });
-  const newOpt = document.createElement('option');
-  newOpt.value = '__new__';
-  newOpt.textContent = '+ Nouvelle catégorie';
-  inputCategorie.appendChild(newOpt);
-}
-
-inputCategorie.onchange = () => {
-  inputNouvelleCategorie.classList.toggle('hidden', inputCategorie.value !== '__new__');
+tabCitations.onclick = () => {
+  tabCitations.classList.add('active');
+  tabFavoris.classList.remove('active');
+  viewCitations.classList.remove('hidden');
+  viewFavoris.classList.add('hidden');
 };
 
-const confirmOverlay = document.getElementById('confirmOverlay');
-const confirmText = document.getElementById('confirmText');
-const confirmAuthor = document.getElementById('confirmAuthor');
-const confirmCategory = document.getElementById('confirmCategory');
-let pendingQuote = null;
-
-document.getElementById('addQuoteBtn').onclick = () => {
-  const texte = inputTexte.value.trim();
-  const auteur = inputAuteur.value.trim() || 'Abraham K';
-  let categorie = inputCategorie.value;
-  if (categorie === '__new__') {
-    categorie = inputNouvelleCategorie.value.trim();
-  }
-
-  if (!texte) {
-    showToast('Écris ta citation avant de l\u2019ajouter');
-    return;
-  }
-  if (!categorie) {
-    showToast('Choisis ou écris une catégorie');
-    return;
-  }
-
-  pendingQuote = { t: texte, a: auteur, c: categorie };
-  confirmText.textContent = pendingQuote.t;
-  confirmAuthor.textContent = '— ' + pendingQuote.a;
-  confirmCategory.textContent = pendingQuote.c;
-  confirmOverlay.classList.remove('hidden');
+tabFavoris.onclick = () => {
+  tabFavoris.classList.add('active');
+  tabCitations.classList.remove('active');
+  viewFavoris.classList.remove('hidden');
+  viewCitations.classList.add('hidden');
+  renderFavorites();
 };
-
-document.getElementById('confirmCancel').onclick = () => {
-  pendingQuote = null;
-  confirmOverlay.classList.add('hidden');
-};
-
-document.getElementById('confirmOk').onclick = () => {
-  if (!pendingQuote) return;
-  userQuotes.push(pendingQuote);
-  saveUserQuotes(userQuotes);
-  pendingQuote = null;
-  confirmOverlay.classList.add('hidden');
-
-  inputTexte.value = '';
-  inputNouvelleCategorie.value = '';
-  inputNouvelleCategorie.classList.add('hidden');
-
-  renderChips();
-  renderCategorySelect();
-  renderMyQuotes();
-  showToast('Citation ajoutée !');
-};
-
-function renderMyQuotes() {
-  myQuotesListEl.innerHTML = '';
-  if (userQuotes.length === 0) {
-    myQuotesListEl.innerHTML = `<div class="empty-fav">Tu n'as pas encore ajouté de citation.</div>`;
-    return;
-  }
-  userQuotes.slice().reverse().forEach((q, revIdx) => {
-    const realIdx = userQuotes.length - 1 - revIdx;
-    const item = document.createElement('div');
-    item.className = 'my-quote-item';
-    item.innerHTML = `<div class="fav-text">${escapeHtml(q.t)}<div class="my-quote-meta">— ${escapeHtml(q.a)} · ${escapeHtml(q.c)}</div></div>`;
-    const rm = document.createElement('button');
-    rm.className = 'fav-remove';
-    rm.textContent = '✕';
-    rm.onclick = () => {
-      userQuotes.splice(realIdx, 1);
-      saveUserQuotes(userQuotes);
-      renderChips();
-      renderCategorySelect();
-      renderMyQuotes();
-    };
-    item.appendChild(rm);
-    myQuotesListEl.appendChild(item);
-  });
-}
 
 function fallbackCopy(text) {
   const textarea = document.createElement('textarea');
