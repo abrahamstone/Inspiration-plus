@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Inspiration Plus</title>
+<style>
+  :root {
+    --bg: #191712;
+    --bg-2: #232019;
+    --text: #f1ede4;
+    --text-soft: #a89f8f;
+    --accent: #e8823f;
+    --accent-2: #4fa89a;
+    --border: #322d24;
+    --error: #e35d5d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px 60px;
+  }
+  .app { width: 100%; max-width: 480px; }
+  h1 {
+    font-size: 1.3rem;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    color: var(--text-soft);
+    font-size: 0.82rem;
+    margin-bottom: 28px;
+  }
+  .card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 18px;
+  }
+  .card h2 {
+    font-size: 0.9rem;
+    margin: 0 0 14px;
+    color: var(--accent);
+  }
+  label {
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 12px 0 6px;
+  }
+  label:first-of-type { margin-top: 0; }
+  input, textarea, select {
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    resize: vertical;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .row {
+    display: flex;
+    gap: 10px;
+  }
+  .row > div { flex: 1; }
+  button {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent);
+    color: #fff8f1;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  button:active:not(:disabled) { transform: scale(0.98); }
+  .status {
+    margin-top: 14px;
+    font-size: 0.85rem;
+    text-align: center;
+    min-height: 20px;
+  }
+  .status.error { color: var(--error); }
+  .status.success { color: var(--accent-2); }
+  .hint {
+    font-size: 0.74rem;
+    color: var(--text-soft);
+    margin-top: 6px;
+  }
+  .warning {
+    background: rgba(227,93,93,0.12);
+    border: 1px solid var(--error);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.78rem;
+    color: var(--text-soft);
+    margin-bottom: 18px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>🔐 Admin — Inspiration Plus</h1>
+  <div class="subtitle">Publier une citation directement sur le site</div>
+
+  <div class="warning">
+    ⚠️ Cette page n'est pas listée sur ton site, mais son adresse reste accessible à qui la connaît. Ne partage jamais ce lien ni ton token.
+  </div>
+
+  <div class="card">
+    <h2>1. Connexion au dépôt</h2>
+    <label for="token">Token GitHub</label>
+    <input type="password" id="token" placeholder="ghp_... ou github_pat_...">
+    <div class="hint">Généré dans GitHub → Settings → Developer settings → Fine-grained tokens.</div>
+
+    <div class="row">
+      <div>
+        <label for="owner">Utilisateur / organisation</label>
+        <input type="text" id="owner" placeholder="ex: abrahamstone">
+      </div>
+      <div>
+        <label for="repo">Dépôt</label>
+        <input type="text" id="repo" placeholder="ex: inspiration-plus">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="branch">Branche</label>
+        <input type="text" id="branch" value="main">
+      </div>
+      <div>
+        <label for="filepath">Fichier</label>
+        <input type="text" id="filepath" value="index.html">
+      </div>
+    </div>
+
+    <div class="hint" id="rememberHint">Ces infos (sauf le token) sont mémorisées sur cet appareil pour la prochaine fois.</div>
+  </div>
+
+  <div class="card">
+    <h2>2. Nouvelle citation</h2>
+    <label for="texte">Citation</label>
+    <textarea id="texte" rows="3" placeholder="Écris ou colle la citation ici..."></textarea>
+
+    <label for="auteur">Auteur</label>
+    <input type="text" id="auteur" value="Abraham K">
+
+    <label for="categorie">Catégorie</label>
+    <input type="text" id="categorie" placeholder="ex: Motivation, Discipline, Vision...">
+  </div>
+
+  <button id="publishBtn" type="button">Publier sur le site</button>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+const tokenEl = document.getElementById('token');
+const ownerEl = document.getElementById('owner');
+const repoEl = document.getElementById('repo');
+const branchEl = document.getElementById('branch');
+const filepathEl = document.getElementById('filepath');
+const texteEl = document.getElementById('texte');
+const auteurEl = document.getElementById('auteur');
+const categorieEl = document.getElementById('categorie');
+const statusEl = document.getElementById('status');
+const publishBtn = document.getElementById('publishBtn');
+
+// Mémorise owner/repo/branch/filepath (jamais le token) pour la prochaine visite
+const CONFIG_KEY = 'inspiration_admin_config';
+try {
+  const saved = JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}');
+  if (saved.owner) ownerEl.value = saved.owner;
+  if (saved.repo) repoEl.value = saved.repo;
+  if (saved.branch) branchEl.value = saved.branch;
+  if (saved.filepath) filepathEl.value = saved.filepath;
+} catch (e) {}
+
+function saveConfig() {
+  try {
+    localStorage.setItem(CONFIG_KEY, JSON.stringify({
+      owner: ownerEl.value.trim(),
+      repo: repoEl.value.trim(),
+      branch: branchEl.value.trim(),
+      filepath: filepathEl.value.trim()
+    }));
+  } catch (e) {}
+}
+
+function setStatus(msg, type) {
+  statusEl.textContent = msg;
+  statusEl.className = 'status' + (type ? ' ' + type : '');
+}
+
+function b64EncodeUnicode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  bytes.forEach(b => { binary += String.fromCharCode(b); });
+  return btoa(binary);
+}
+
+function b64DecodeUnicode(str) {
+  const binary = atob(str.replace(/\n/g, ''));
+  const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
+function insertQuoteIntoSource(source, texte, auteur, categorie) {
+  const marker = 'const QUOTES = [';
+  const startIdx = source.indexOf(marker);
+  if (startIdx === -1) {
+    throw new Error('Le tableau "const QUOTES = [" est introuvable dans ce fichier.');
+  }
+  const closeIdx = source.indexOf('\n];', startIdx);
+  if (closeIdx === -1) {
+    throw new Error('La fin du tableau QUOTES est introuvable.');
+  }
+  const line = '  { t: ' + JSON.stringify(texte) + ', a: ' + JSON.stringify(auteur) + ', c: ' + JSON.stringify(categorie) + ' },';
+  return source.slice(0, closeIdx) + '\n' + line + source.slice(closeIdx);
+}
+
+publishBtn.onclick = async () => {
+  const token = tokenEl.value.trim();
+  const owner = ownerEl.value.trim();
+  const repo = repoEl.value.trim();
+  const branch = branchEl.value.trim() || 'main';
+  const filepath = filepathEl.value.trim() || 'index.html';
+  const texte = texteEl.value.trim();
+  const auteur = auteurEl.value.trim() || 'Abraham K';
+  const categorie = categorieEl.value.trim();
+
+  if (!token || !owner || !repo || !texte || !categorie) {
+    setStatus('Remplis tous les champs (token, dépôt, citation, catégorie).', 'error');
+    return;
+  }
+
+  saveConfig();
+  publishBtn.disabled = true;
+  setStatus('Récupération du fichier...', '');
+
+  const apiBase = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + filepath;
+  const headers = {
+    'Authorization': 'Bearer ' + token,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
+
+  try {
+    const getRes = await fetch(apiBase + '?ref=' + encodeURIComponent(branch), { headers });
+    if (!getRes.ok) {
+      const errBody = await getRes.json().catch(() => ({}));
+      throw new Error('Lecture impossible (' + getRes.status + ') : ' + (errBody.message || 'vérifie le token, le dépôt et le nom du fichier.'));
+    }
+    const fileData = await getRes.json();
+    const currentContent = b64DecodeUnicode(fileData.content);
+
+    setStatus('Insertion de la citation...', '');
+    const newContent = insertQuoteIntoSource(currentContent, texte, auteur, categorie);
+
+    setStatus('Envoi sur GitHub...', '');
+    const putRes = await fetch(apiBase, {
+      method: 'PUT',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, headers),
+      body: JSON.stringify({
+        message: 'Ajout d\u2019une citation via la page admin',
+        content: b64EncodeUnicode(newContent),
+        sha: fileData.sha,
+        branch: branch
+      })
+    });
+
+    if (!putRes.ok) {
+      const errBody = await putRes.json().catch(() => ({}));
+      throw new Error('Publication impossible (' + putRes.status + ') : ' + (errBody.message || 'réessaie.'));
+    }
+
+    setStatus('✅ Citation publiée ! Elle sera en ligne dans 1-2 minutes.', 'success');
+    texteEl.value = '';
+    categorieEl.value = '';
+  } catch (e) {
+    setStatus('❌ ' + e.message, 'error');
+  } finally {
+    publishBtn.disabled = false;
+  }
+};
+</script>
+</body>
+</html>
