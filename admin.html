@@ -120,6 +120,34 @@
     color: var(--text-soft);
     margin-bottom: 18px;
   }
+  .del-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .del-item .del-text {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  .del-item .del-meta {
+    font-size: 0.72rem;
+    color: var(--text-soft);
+    margin-top: 4px;
+  }
+  .del-item button {
+    width: auto;
+    margin-top: 0;
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    background: var(--error);
+  }
 </style>
 </head>
 <body>
@@ -176,6 +204,13 @@
 
   <button id="publishBtn" type="button">Publier sur le site</button>
   <div class="status" id="status"></div>
+
+  <div class="card" style="margin-top:36px;">
+    <h2>3. Supprimer une citation</h2>
+    <button id="loadListBtn" type="button" style="margin-top:0;background:var(--accent-2);">Charger la liste des citations</button>
+    <div id="deleteList" style="margin-top:14px;"></div>
+  </div>
+  <div class="status" id="deleteStatus"></div>
 </div>
 
 <script>
@@ -189,6 +224,9 @@ const auteurEl = document.getElementById('auteur');
 const categorieEl = document.getElementById('categorie');
 const statusEl = document.getElementById('status');
 const publishBtn = document.getElementById('publishBtn');
+const loadListBtn = document.getElementById('loadListBtn');
+const deleteListEl = document.getElementById('deleteList');
+const deleteStatusEl = document.getElementById('deleteStatus');
 
 // Mémorise owner/repo/branch/filepath (jamais le token) pour la prochaine visite
 const CONFIG_KEY = 'inspiration_admin_config';
@@ -307,6 +345,156 @@ publishBtn.onclick = async () => {
     publishBtn.disabled = false;
   }
 };
+
+// ---- Suppression ----
+
+let loadedSha = null;
+let loadedArrStart = null;
+let loadedCloseIdx = null;
+let loadedFullSource = null;
+let loadedQuotesArray = null;
+
+function setDeleteStatus(msg, type) {
+  deleteStatusEl.textContent = msg;
+  deleteStatusEl.className = 'status' + (type ? ' ' + type : '');
+}
+
+function apiHeaders(token) {
+  return {
+    'Authorization': 'Bearer ' + token,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
+}
+
+function extractQuotesArray(source) {
+  const marker = 'const QUOTES = [';
+  const startIdx = source.indexOf(marker);
+  if (startIdx === -1) throw new Error('Le tableau "const QUOTES = [" est introuvable.');
+  const arrStart = startIdx + marker.length - 1;
+  const closeIdx = source.indexOf('\n];', startIdx);
+  if (closeIdx === -1) throw new Error('La fin du tableau QUOTES est introuvable.');
+  const arrText = source.slice(arrStart, closeIdx + 2);
+  const arr = new Function('return ' + arrText)();
+  return { arr, arrStart, closeIdx };
+}
+
+function buildQuotesBlock(arr) {
+  const lines = arr.map(q => '  { t: ' + JSON.stringify(q.t) + ', a: ' + JSON.stringify(q.a) + ', c: ' + JSON.stringify(q.c) + ' },');
+  return '[\n' + lines.join('\n') + '\n]';
+}
+
+function renderDeleteList() {
+  deleteListEl.innerHTML = '';
+  if (!loadedQuotesArray || loadedQuotesArray.length === 0) {
+    deleteListEl.innerHTML = '<div class="hint">Aucune citation trouvée.</div>';
+    return;
+  }
+  loadedQuotesArray.forEach((q, idx) => {
+    const item = document.createElement('div');
+    item.className = 'del-item';
+    item.innerHTML = '<div><div class="del-text">"' + q.t.replace(/</g, '&lt;') + '"</div>' +
+      '<div class="del-meta">— ' + q.a.replace(/</g, '&lt;') + ' · ' + q.c.replace(/</g, '&lt;') + '</div></div>';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = '✕ Supprimer';
+    btn.onclick = () => deleteQuoteAt(idx);
+    item.appendChild(btn);
+    deleteListEl.appendChild(item);
+  });
+}
+
+loadListBtn.onclick = async () => {
+  const token = tokenEl.value.trim();
+  const owner = ownerEl.value.trim();
+  const repo = repoEl.value.trim();
+  const branch = branchEl.value.trim() || 'main';
+  const filepath = filepathEl.value.trim() || 'index.html';
+
+  if (!token || !owner || !repo) {
+    setDeleteStatus('Remplis le token, le dépôt et l\u2019utilisateur en haut du formulaire.', 'error');
+    return;
+  }
+  saveConfig();
+  setDeleteStatus('Chargement...', '');
+  loadListBtn.disabled = true;
+
+  const apiBase = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + filepath;
+
+  try {
+    const getRes = await fetch(apiBase + '?ref=' + encodeURIComponent(branch), { headers: apiHeaders(token) });
+    if (!getRes.ok) {
+      const errBody = await getRes.json().catch(() => ({}));
+      throw new Error('Lecture impossible (' + getRes.status + ') : ' + (errBody.message || 'vérifie le token et le dépôt.'));
+    }
+    const fileData = await getRes.json();
+    const source = b64DecodeUnicode(fileData.content);
+    const { arr, arrStart, closeIdx } = extractQuotesArray(source);
+
+    loadedSha = fileData.sha;
+    loadedFullSource = source;
+    loadedArrStart = arrStart;
+    loadedCloseIdx = closeIdx;
+    loadedQuotesArray = arr;
+
+    renderDeleteList();
+    setDeleteStatus(arr.length + ' citations chargées.', 'success');
+  } catch (e) {
+    setDeleteStatus('❌ ' + e.message, 'error');
+  } finally {
+    loadListBtn.disabled = false;
+  }
+};
+
+async function deleteQuoteAt(idx) {
+  if (!loadedQuotesArray) return;
+  const q = loadedQuotesArray[idx];
+  if (!confirm('Supprimer cette citation ?\n\n"' + q.t + '"')) return;
+
+  const token = tokenEl.value.trim();
+  const owner = ownerEl.value.trim();
+  const repo = repoEl.value.trim();
+  const branch = branchEl.value.trim() || 'main';
+  const filepath = filepathEl.value.trim() || 'index.html';
+  const apiBase = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + filepath;
+
+  setDeleteStatus('Suppression...', '');
+
+  const newArr = loadedQuotesArray.slice(0, idx).concat(loadedQuotesArray.slice(idx + 1));
+  const newBlock = buildQuotesBlock(newArr);
+  const newSource = loadedFullSource.slice(0, loadedArrStart) + newBlock + loadedFullSource.slice(loadedCloseIdx + 2);
+
+  try {
+    const putRes = await fetch(apiBase, {
+      method: 'PUT',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, apiHeaders(token)),
+      body: JSON.stringify({
+        message: 'Suppression d\u2019une citation via la page admin',
+        content: b64EncodeUnicode(newSource),
+        sha: loadedSha,
+        branch: branch
+      })
+    });
+
+    if (!putRes.ok) {
+      const errBody = await putRes.json().catch(() => ({}));
+      throw new Error('Suppression impossible (' + putRes.status + ') : ' + (errBody.message || 'réessaie.'));
+    }
+
+    const putData = await putRes.json();
+    loadedSha = putData.content.sha;
+    loadedFullSource = newSource;
+    const reExtract = extractQuotesArray(newSource);
+    loadedArrStart = reExtract.arrStart;
+    loadedCloseIdx = reExtract.closeIdx;
+    loadedQuotesArray = newArr;
+
+    renderDeleteList();
+    setDeleteStatus('✅ Citation supprimée ! En ligne dans 1-2 minutes.', 'success');
+  } catch (e) {
+    setDeleteStatus('❌ ' + e.message, 'error');
+  }
+}
 </script>
 </body>
 </html>
