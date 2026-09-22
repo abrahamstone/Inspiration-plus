@@ -183,7 +183,7 @@
       </div>
       <div>
         <label for="filepath">Fichier</label>
-        <input type="text" id="filepath" value="index.html">
+        <input type="text" id="filepath" value="citations.json">
       </div>
     </div>
 
@@ -267,26 +267,12 @@ function b64DecodeUnicode(str) {
   return new TextDecoder('utf-8').decode(bytes);
 }
 
-function insertQuoteIntoSource(source, texte, auteur, categorie) {
-  const marker = 'const QUOTES = [';
-  const startIdx = source.indexOf(marker);
-  if (startIdx === -1) {
-    throw new Error('Le tableau "const QUOTES = [" est introuvable dans ce fichier.');
-  }
-  const closeIdx = source.indexOf('\n];', startIdx);
-  if (closeIdx === -1) {
-    throw new Error('La fin du tableau QUOTES est introuvable.');
-  }
-  const line = '  { t: ' + JSON.stringify(texte) + ', a: ' + JSON.stringify(auteur) + ', c: ' + JSON.stringify(categorie) + ' },';
-  return source.slice(0, closeIdx) + '\n' + line + source.slice(closeIdx);
-}
-
 publishBtn.onclick = async () => {
   const token = tokenEl.value.trim();
   const owner = ownerEl.value.trim();
   const repo = repoEl.value.trim();
   const branch = branchEl.value.trim() || 'main';
-  const filepath = filepathEl.value.trim() || 'index.html';
+  const filepath = filepathEl.value.trim() || 'citations.json';
   const texte = texteEl.value.trim();
   const auteur = auteurEl.value.trim() || 'Abraham K';
   const categorie = categorieEl.value.trim();
@@ -315,9 +301,11 @@ publishBtn.onclick = async () => {
     }
     const fileData = await getRes.json();
     const currentContent = b64DecodeUnicode(fileData.content);
+    const arr = JSON.parse(currentContent);
 
     setStatus('Insertion de la citation...', '');
-    const newContent = insertQuoteIntoSource(currentContent, texte, auteur, categorie);
+    arr.push({ t: texte, a: auteur, c: categorie });
+    const newContent = JSON.stringify(arr, null, 2);
 
     setStatus('Envoi sur GitHub...', '');
     const putRes = await fetch(apiBase, {
@@ -349,9 +337,6 @@ publishBtn.onclick = async () => {
 // ---- Suppression ----
 
 let loadedSha = null;
-let loadedArrStart = null;
-let loadedCloseIdx = null;
-let loadedFullSource = null;
 let loadedQuotesArray = null;
 
 function setDeleteStatus(msg, type) {
@@ -365,23 +350,6 @@ function apiHeaders(token) {
     'Accept': 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28'
   };
-}
-
-function extractQuotesArray(source) {
-  const marker = 'const QUOTES = [';
-  const startIdx = source.indexOf(marker);
-  if (startIdx === -1) throw new Error('Le tableau "const QUOTES = [" est introuvable.');
-  const arrStart = startIdx + marker.length - 1;
-  const closeIdx = source.indexOf('\n];', startIdx);
-  if (closeIdx === -1) throw new Error('La fin du tableau QUOTES est introuvable.');
-  const arrText = source.slice(arrStart, closeIdx + 2);
-  const arr = new Function('return ' + arrText)();
-  return { arr, arrStart, closeIdx };
-}
-
-function buildQuotesBlock(arr) {
-  const lines = arr.map(q => '  { t: ' + JSON.stringify(q.t) + ', a: ' + JSON.stringify(q.a) + ', c: ' + JSON.stringify(q.c) + ' },');
-  return '[\n' + lines.join('\n') + '\n]';
 }
 
 function renderDeleteList() {
@@ -409,7 +377,7 @@ loadListBtn.onclick = async () => {
   const owner = ownerEl.value.trim();
   const repo = repoEl.value.trim();
   const branch = branchEl.value.trim() || 'main';
-  const filepath = filepathEl.value.trim() || 'index.html';
+  const filepath = filepathEl.value.trim() || 'citations.json';
 
   if (!token || !owner || !repo) {
     setDeleteStatus('Remplis le token, le dépôt et l\u2019utilisateur en haut du formulaire.', 'error');
@@ -429,12 +397,9 @@ loadListBtn.onclick = async () => {
     }
     const fileData = await getRes.json();
     const source = b64DecodeUnicode(fileData.content);
-    const { arr, arrStart, closeIdx } = extractQuotesArray(source);
+    const arr = JSON.parse(source);
 
     loadedSha = fileData.sha;
-    loadedFullSource = source;
-    loadedArrStart = arrStart;
-    loadedCloseIdx = closeIdx;
     loadedQuotesArray = arr;
 
     renderDeleteList();
@@ -455,14 +420,13 @@ async function deleteQuoteAt(idx) {
   const owner = ownerEl.value.trim();
   const repo = repoEl.value.trim();
   const branch = branchEl.value.trim() || 'main';
-  const filepath = filepathEl.value.trim() || 'index.html';
+  const filepath = filepathEl.value.trim() || 'citations.json';
   const apiBase = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + filepath;
 
   setDeleteStatus('Suppression...', '');
 
   const newArr = loadedQuotesArray.slice(0, idx).concat(loadedQuotesArray.slice(idx + 1));
-  const newBlock = buildQuotesBlock(newArr);
-  const newSource = loadedFullSource.slice(0, loadedArrStart) + newBlock + loadedFullSource.slice(loadedCloseIdx + 2);
+  const newContent = JSON.stringify(newArr, null, 2);
 
   try {
     const putRes = await fetch(apiBase, {
@@ -470,7 +434,7 @@ async function deleteQuoteAt(idx) {
       headers: Object.assign({ 'Content-Type': 'application/json' }, apiHeaders(token)),
       body: JSON.stringify({
         message: 'Suppression d\u2019une citation via la page admin',
-        content: b64EncodeUnicode(newSource),
+        content: b64EncodeUnicode(newContent),
         sha: loadedSha,
         branch: branch
       })
@@ -483,10 +447,6 @@ async function deleteQuoteAt(idx) {
 
     const putData = await putRes.json();
     loadedSha = putData.content.sha;
-    loadedFullSource = newSource;
-    const reExtract = extractQuotesArray(newSource);
-    loadedArrStart = reExtract.arrStart;
-    loadedCloseIdx = reExtract.closeIdx;
     loadedQuotesArray = newArr;
 
     renderDeleteList();
