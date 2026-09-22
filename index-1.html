@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inspiration Plus — Citations motivantes</title>
+<meta name="description" content="Inspiration Plus — Un site de citations motivantes écrites par Abraham K. Découvre une citation par jour, explore par catégorie, et garde tes préférées en favoris.">
+<meta property="og:title" content="Inspiration Plus — Citations motivantes">
+<meta property="og:description" content="Une citation par jour pour nourrir ta motivation, écrite par Abraham K.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Inspiration Plus">
+<meta name="twitter:description" content="Une citation par jour pour nourrir ta motivation, écrite par Abraham K.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">✦ Inspiration Plus</div>
+    <div class="tagline">Ta dose quotidienne de motivation</div>
+    <div class="signature">By Abraham K</div>
+    <p class="intro">✨ Une sélection de citations pour nourrir ta motivation, jour après jour. 🔥 Explore les catégories ou clique sur « Nouvelle citation » 👇</p>
+  </header>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" id="tabCitations" type="button">Citations</button>
+    <button class="tab" id="tabFavoris" type="button">Favoris <span id="favCount"></span></button>
+  </div>
+
+  <div id="viewCitations">
+    <div class="chips" id="chips"></div>
+
+    <div class="card" id="card">
+      <button class="heart-btn" id="heartBtn" type="button">
+        <span id="heartIcon">♡</span> <span id="heartLabel">J'aime</span>
+      </button>
+      <div class="quote-mark">"</div>
+      <p class="quote-text" id="quoteText"></p>
+      <div class="quote-author" id="quoteAuthor"></div>
+      <div class="quote-category" id="quoteCategory"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-secondary" id="copyBtn">Copier</button>
+      <button class="btn btn-primary" id="newBtn">Nouvelle citation</button>
+    </div>
+
+    <a class="suggest-link" href="https://docs.google.com/forms/d/e/1FAIpQLScQ790noeAk8HSE54xhhEwHdWb3IPgl-8wuF8P9KIKxgDki5Q/viewform?usp=dialog" target="_blank" rel="noopener">✏️ Suggérer une citation</a>
+  </div>
+
+  <div id="viewFavoris" class="hidden">
+    <div class="favorites-section">
+      <div id="favList"></div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-line"></div>
+    <p>✦ Inspiration Plus — écrit et curaté par <strong>Abraham K</strong></p>
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
